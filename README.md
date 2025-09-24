@@ -7,16 +7,19 @@ Frictional Q-Learning (FQL) is a batch deep reinforcement learning algorithm tha
 
 
 ```python
-wandb login # only required for the first time
-uv run python cleanrl/ppo.py
+cd cleanrl
+python run.py
 
-    --seed 1
-
-    --env-id CartPole-v0
-
-    --total-timesteps 50000
-
-    --track
-
-    --wandb-project-name cleanrltest
+cd fql
+python run.py --cuda_id 0
 ```
+
+### BibTeX
+```bibtex
+@article{kim2025advancing,
+  title={Advancing Continuous Prediction for Acute Kidney Injury via Multi-task Learning: Towards Better Clinical Applicability},
+  author={Kim, Hyunwoo and Lee, Sung Woo and Kim, Su Jin and Han, Kap Su and Lee, Sijin and Song, Juhyun and Lee, Hyo Kyung},
+  journal={IEEE Journal of Biomedical and Health Informatics},
+  year={2025},
+  publisher={IEEE}
+}
