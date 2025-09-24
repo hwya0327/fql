@@ -1,6 +1,6 @@
 # Frictional Q-Learning (FQL)
 
-Frictional Q-Learning (FQL) is a batch deep reinforcement learning algorithm that learn off-policy with frictional constraints.
+Frictional Q-Learning (FQL) is a first batch deep reinforcement learning algorithm that learn off-policy with expanded constraints from static friction.
 
 
 
