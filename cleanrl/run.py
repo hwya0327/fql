@@ -50,6 +50,7 @@ meow_params = {
 }
 
 os.makedirs("logs", exist_ok=True)
+os.makedirs("runs", exist_ok=True)
 
 for algo in algorithms:
     print(f"\n🚀 Starting all environments for algorithm: {algo}")
