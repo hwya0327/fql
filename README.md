@@ -1,1 +1,1 @@
-# Frictional Q-Learning
+# Frictional Q-Learning (FQL)
