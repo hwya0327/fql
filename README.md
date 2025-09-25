@@ -12,6 +12,7 @@ python run.py
 
 cd fql
 python run.py --cuda_id 0
+python plot.py
 ```
 Most of the evaluation results presented in the paper are provided in [runs.zip](https://drive.google.com/file/d/1iRxhVomISLPwDjOazPrOp1I3veaw72xX/view?usp=sharing)
 
