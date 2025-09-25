@@ -15,7 +15,8 @@ python run.py --cuda_id 0
 ```
 Most of the evaluation results presented in the paper are provided in [runs.zip](https://drive.google.com/file/d/1iRxhVomISLPwDjOazPrOp1I3veaw72xX/view?usp=sharing)
 
-### BibTex
+### BibTeX
+```bibtex
 @misc{kim2025frictionalqlearning,
       title={Frictional Q-Learning}, 
       author={Hyunwoo Kim and Hyo Kyung Lee},
