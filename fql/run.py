@@ -5,11 +5,11 @@ import time
 import threading
 
 env_config = {
-    "HalfCheetah-v4": {"total_timesteps": 5000000, "learning_starts": 25000, 'tau': 0.005, 'beta': 2.0, 'q_lr': 0.001},
-    "Hopper-v4": {"total_timesteps": 5000000, "learning_starts": 5000, 'tau': 0.003, 'beta': 5.0, 'q_lr': 0.0003},
+    "HalfCheetah-v4": {"total_timesteps": 5000000, "learning_starts": 25000, 'tau': 0.005, 'beta': 1.0, 'q_lr': 0.0003},
+    "Hopper-v4": {"total_timesteps": 5000000, "learning_starts": 5000, 'tau': 0.003, 'beta': 2.0, 'q_lr': 0.001},
     "Walker2d-v4": {"total_timesteps": 5000000, "learning_starts": 10000, 'tau': 0.005, 'beta': 2.0, 'q_lr': 0.001},
-    "Ant-v4": {"total_timesteps": 5000000, "learning_starts": 25000, 'tau': 0.005, 'beta': 0.0, 'q_lr': 0.001},
-    "Humanoid-v4": {"total_timesteps": 5000000, "learning_starts": 25000, 'tau': 0.003, 'beta': 0.0, 'q_lr': 0.0003},
+    "Ant-v4": {"total_timesteps": 5000000, "learning_starts": 25000, 'tau': 0.005, 'beta': 2.0, 'q_lr': 0.0003},
+    "Humanoid-v4": {"total_timesteps": 5000000, "learning_starts": 25000, 'tau': 0.003, 'beta': 1.0, 'q_lr': 0.0003},
 }
 
 os.makedirs("logs", exist_ok=True)
