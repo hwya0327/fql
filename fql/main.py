@@ -56,13 +56,13 @@ def interact_with_environment(env, eval_envs, state_dim, action_dim, max_action,
         if global_step >= args.learning_starts and replay_buffer.size >= args.batch_size:
             losses = policy.train(replay_buffer, args.batch_size, global_step)
 
-            if global_step % 1000 == 0:
+            if (global_step+1) % 1000 == 0:
                 sps = int(global_step / (time.time() - start_time))
                 writer.add_scalar("charts/SPS", sps, global_step)
                 for k, v in losses.items():
                     writer.add_scalar(f"losses/{k}", v, global_step)
 
-            if global_step % 10000 == 0:
+            if (global_step+1) % 10000 == 0:
                 eval_return = eval_policy(policy, eval_envs)
                 evaluations.append(eval_return)
                 np.save(f"./results/performance_{setting}", evaluations)
