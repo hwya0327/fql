@@ -1,4 +1,3 @@
-import utils
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -6,7 +5,7 @@ import torch.nn.functional as F
 EPSILON = 1e-6
 
 class ContrastiveVAE(nn.Module):
-    def __init__(self, state_dim, action_dim, latent_dim, lr, max_action, beta, use_tc, device, use_bias=False):
+    def __init__(self, state_dim, action_dim, latent_dim, cvae_dim, lr, max_action, beta, use_tc, device, use_bias=False):
         super().__init__()
         self.latent_dim = latent_dim
         self.max_action = max_action
@@ -15,20 +14,20 @@ class ContrastiveVAE(nn.Module):
         self.device = device
         self.use_bias = use_bias
 
-        self.encoder_z = self._make_encoder(state_dim + action_dim, 512)
-        self.encoder_s = self._make_encoder(state_dim + action_dim, 512)
+        self.encoder_z = self._make_encoder(state_dim + action_dim, cvae_dim)
+        self.encoder_s = self._make_encoder(state_dim + action_dim, cvae_dim)
 
-        self.z_mean = nn.Linear(512, latent_dim, bias=self.use_bias)
-        self.z_logstd = nn.Linear(512, latent_dim, bias=self.use_bias)
-        self.s_mean = nn.Linear(512, latent_dim, bias=self.use_bias)
-        self.s_logstd = nn.Linear(512, latent_dim, bias=self.use_bias)
+        self.z_mean = nn.Linear(cvae_dim, latent_dim, bias=self.use_bias)
+        self.z_logstd = nn.Linear(cvae_dim, latent_dim, bias=self.use_bias)
+        self.s_mean = nn.Linear(cvae_dim, latent_dim, bias=self.use_bias)
+        self.s_logstd = nn.Linear(cvae_dim, latent_dim, bias=self.use_bias)
 
         self.decoder = nn.Sequential(
-            nn.Linear(state_dim + 2 * latent_dim, 512, bias=self.use_bias),
+            nn.Linear(state_dim + 2 * latent_dim, cvae_dim, bias=self.use_bias),
             nn.ReLU(),
-            nn.Linear(512, 512, bias=self.use_bias),
+            nn.Linear(cvae_dim, cvae_dim, bias=self.use_bias),
             nn.ReLU(),
-            nn.Linear(512, action_dim, bias=self.use_bias)
+            nn.Linear(cvae_dim, action_dim, bias=self.use_bias)
         )
 
         if use_tc:
@@ -38,13 +37,16 @@ class ContrastiveVAE(nn.Module):
             )
             self.optimizer_disc = torch.optim.Adam(self.discriminator.parameters(), lr=lr)
 
-        self.optimizer = torch.optim.Adam(self.parameters(), lr=lr)
+        self.optimizer = torch.optim.Adam(
+            [p for n, p in self.named_parameters() if "discriminator" not in n],
+            lr=lr
+        )
 
-    def _make_encoder(self, input_dim, hidden_dim):
+    def _make_encoder(self, input_dim, cvae_dim):
         return nn.Sequential(
-            nn.Linear(input_dim, hidden_dim, bias=self.use_bias),
+            nn.Linear(input_dim, cvae_dim, bias=self.use_bias),
             nn.ReLU(),
-            nn.Linear(hidden_dim, hidden_dim, bias=self.use_bias),
+            nn.Linear(cvae_dim, cvae_dim, bias=self.use_bias),
             nn.ReLU()
         )
 
@@ -105,15 +107,15 @@ class ContrastiveVAE(nn.Module):
 
         if self.use_tc:
             z, s = out["z_t"], out["s_t"]
+            n = (z.size(0) // 2) * 2
+            z = z[:n]
+            s = s[:n]
+
             z1, z2 = z.chunk(2, dim=0)
             s1, s2 = s.chunk(2, dim=0)
 
             q_pos = torch.cat([torch.cat([s1, z1], dim=1), torch.cat([s2, z2], dim=1)], dim=0)
             q_neg = torch.cat([torch.cat([s1, z2], dim=1), torch.cat([s2, z1], dim=1)], dim=0)
-
-            with torch.no_grad():
-                d_pos = self.discriminator(q_pos).clamp(EPSILON, 1 - EPSILON)
-            tc_loss = torch.log(d_pos / (1 - d_pos)).mean()
 
             d_pos_ = self.discriminator(q_pos.detach()).clamp(EPSILON, 1 - EPSILON)
             d_neg_ = self.discriminator(q_neg.detach()).clamp(EPSILON, 1 - EPSILON)
@@ -123,7 +125,16 @@ class ContrastiveVAE(nn.Module):
             disc_loss.backward()
             self.optimizer_disc.step()
 
-            loss += tc_loss
+            for p in self.discriminator.parameters():
+                p.requires_grad_(False)
+
+            d_pos = self.discriminator(q_pos).clamp(EPSILON, 1 - EPSILON)
+            tc_loss = torch.log(d_pos / (1 - d_pos)).mean()
+
+            for p in self.discriminator.parameters():
+                p.requires_grad_(True)
+
+            loss = loss + tc_loss
 
         self.optimizer.zero_grad()
         loss.backward()
