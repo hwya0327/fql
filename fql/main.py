@@ -50,7 +50,7 @@ def interact_with_environment(env, eval_envs, state_dim, action_dim, max_action,
 
         if done:
             print(f"Total T: {global_step} Episode Num: {ep_num+1} Episode T: {ep_timesteps} Reward: {epeward:.3f}")
-            state, _ = env.reset()
+            state, _ = env.reset(seed=args.seed+global_step+1)
             epeward, ep_timesteps, ep_num = 0, 0, ep_num + 1
 
         if global_step >= args.learning_starts and replay_buffer.size >= args.batch_size:
